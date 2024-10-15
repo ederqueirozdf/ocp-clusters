@@ -1,0 +1,24 @@
+{{- if .Values.createMachinePools }}
+{{- range .Values.compute }}
+---
+apiVersion: hive.openshift.io/v1
+kind: MachinePool
+metadata:
+  name: {{ $.Values.cluster.name }}-{{ .name }}
+spec:
+  clusterDeploymentRef:
+    name: {{ $.Values.cluster.name }}
+  name: {{ .name }}
+{{- if .labels}}
+  labels: 
+{{ toYaml .labels | indent 4 }}
+{{- end }}
+{{- if .taints }}
+  taints:
+{{ toYaml .taints | indent 4 }}
+{{- end }}
+  platform:
+{{ toYaml .platform | indent 4 }}
+  replicas: {{ .replicas }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,28 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: policy
+policyDefaults:
+  description: "Policy generator install-config"
+  namespace: policies
+  remediationAction: enforce
+  # policySets:
+  #   - openshift-clusters
+  placement:
+    labelSelector:
+      matchExpressions:
+        - key: cloud
+          operator: In
+          values:
+            - VSphere
+placementBindingDefaults:
+  name: equeiroz-prd
+
+policies:
+  - name: equeiroz-prd-install-config
+    remediationAction: enforce
+    manifests:
+      - path: secrets.yaml
+        complianceType: musthave
+      - path: install-config.yaml
+        complianceType: musthave

@@ -1,0 +1,68 @@
+# Default values for cluster-managed.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+cluster:
+  name: equeiroz-prd
+  baseDomain: lab7.tec.br
+  apiVIP: 10.36.55.10
+  ingressVIP: 10.36.55.20
+#    releaseVersion:
+#    clusterOSImage: 
+  vsphere:
+    vCenter: vcsa.lab7.tec.br
+    cluster: cluster
+    datacenter: Datacenter
+    defaultDatastore: datastore3
+    network: 'VM Network'
+    folder: "/Datacenter/vm/Plataformas/Cloud/equeiroz/"      
+  labels:
+    cluster.managed/name: equeiroz-prd
+    cluster.managed/ambiente: prd
+    cluster.managed/tipo: app
+  annotations: 
+    argocd.argoproj.io/sync-options: Prune=false
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+  clusterset: global
+  imageSet: img4.14.31-multi-appsub
+
+# Create machinePool in ACM cluster based on .Values.compute
+createMachinePools: true
+
+controlPlane:
+  cpus: 8
+  coresPerSocket: 2
+  memoryMB: 24576
+  osDisk:
+    diskSizeGB: 120
+
+compute:
+- hyperthreading: Enabled
+  name: worker
+  replicas: 3
+  platform:
+    vsphere:
+      cpus: 4
+      coresPerSocket: 2
+      memoryMB: 16384
+      osDisk:
+        diskSizeGB: 120
+
+
+networking:
+  networkType: OVNKubernetes
+  clusterNetwork:
+  - cidr: 10.148.0.0/14
+    hostPrefix: 24
+  machineNetwork:
+  - cidr: 10.36.0.0/16
+  serviceNetwork:
+  - 172.30.0.0/16
+
+imageContentSources: []
+proxy:
+  httpProxy: ""
+  httpsProxy: ""
+  noProxy: ""
+
+additionalTrustBundle: ""

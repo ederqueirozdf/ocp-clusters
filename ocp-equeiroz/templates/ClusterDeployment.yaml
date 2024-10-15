@@ -1,0 +1,40 @@
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: {{ .Values.cluster.name }}
+  annotations: 
+    argocd.argoproj.io/sync-wave: '-1'
+{{ toYaml .Values.cluster.annotations | indent 4 }}  
+  labels:
+    cloud: 'vSphere'
+    vendor: OpenShift
+    cluster.open-cluster-management.io/clusterset: {{ .Values.cluster.clusterset }}
+{{ toYaml .Values.cluster.labels | indent 4 }}    
+spec:
+  baseDomain: {{ .Values.cluster.baseDomain }}
+  clusterName: {{ .Values.cluster.name }}
+  controlPlaneConfig:
+    servingCertificates: {}
+  installAttemptsLimit: 2
+  installed: false
+  platform:
+    vsphere:
+      cluster: {{ .Values.cluster.vsphere.cluster }}
+      certificatesSecretRef:
+        name: vsphere-certs
+      credentialsSecretRef:
+        name: vsphere-creds
+      vCenter: {{ .Values.cluster.vsphere.vCenter }}
+      datacenter: {{ .Values.cluster.vsphere.datacenter }}
+      defaultDatastore: {{ .Values.cluster.vsphere.defaultDatastore }}
+      network: {{ .Values.cluster.vsphere.network }}
+  provisioning:
+    installConfigSecretRef:
+      name: install-config
+    sshPrivateKeySecretRef:
+      name: ssh-private-key
+    imageSetRef:
+      #quay.io/openshift-release-dev/ocp-release:4.14.30-multi
+      name: {{ .Values.cluster.imageSet }}
+  pullSecretRef:
+    name: pull-secret

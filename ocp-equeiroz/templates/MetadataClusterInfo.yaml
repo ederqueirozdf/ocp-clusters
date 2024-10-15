@@ -1,0 +1,37 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: cluster-info
+  namespace: {{ .Values.cluster.name }}
+  annotations:
+    openshift.io/display-name: {{ .Values.cluster.name | quote }}
+    cluster.open-cluster-management.io/managedCluster: {{ .Values.cluster.name | quote }}
+    kubernetes.io/metadata.name: {{ .Values.cluster.name | quote }}
+    helm.sh/hook-weight: "350"
+data:
+  compute_replicas: {{ (index .Values.compute 0).replicas | quote }}
+  compute_cores_per_socket: {{ (index .Values.compute 0).platform.vsphere.coresPerSocket | quote }}
+  control_plane_cores_per_socket: {{ .Values.controlPlane.coresPerSocket | quote }}
+  clusterset: {{ .Values.cluster.clusterset | quote }}
+  vsphere_folder: {{ .Values.cluster.vsphere.folder | quote }}
+  network_type: {{ .Values.networking.networkType | quote }}
+  compute_memory_mb: {{ (index .Values.compute 0).platform.vsphere.memoryMB | quote }}
+  machineNetwork_cidr: {{ index .Values.networking.machineNetwork 0 "cidr" | quote }}
+  control_plane_memory_mb:  {{ .Values.controlPlane.memoryMB | quote }}
+  vsphere_vcenter: {{ .Values.cluster.vsphere.vCenter | quote }}
+  cluster_name: {{ .Values.cluster.name | quote }}
+  control_plane_cpus: {{ .Values.controlPlane.cpus | quote }}
+  vsphere_network: {{ .Values.cluster.vsphere.network | quote }}
+  base_domain: {{ .Values.cluster.baseDomain | quote }}
+  compute_cpus: {{ (index .Values.compute 0).platform.vsphere.cpus | quote }}
+  ingress_vip: {{ .Values.cluster.ingressVIP | quote }}
+  api_vip: {{ .Values.cluster.apiVIP | quote }}
+  serviceNetwork_cidr: {{ index .Values.networking.serviceNetwork 0 | quote }}
+  vsphere_datacenter: {{ .Values.cluster.vsphere.datacenter | quote }}
+  control_plane_disk_size_gb: {{ .Values.controlPlane.osDisk.diskSizeGB | quote }}
+  vsphere_default_datastore: {{ .Values.cluster.vsphere.defaultDatastore | quote }}
+  vsphere_cluster: {{ .Values.cluster.vsphere.cluster | quote }}
+  image_set:  {{ .Values.cluster.imageSet | quote }}
+  compute_disk_size_gb: {{ (index .Values.compute 0).platform.vsphere.osDisk.diskSizeGB | quote }}
+  clusterNetwork_cidr: {{ index .Values.networking.clusterNetwork 0 "cidr" | quote }}
+  clusterNetwork_hostPrefix: {{ (index .Values.networking.clusterNetwork 0).hostPrefix | quote }}

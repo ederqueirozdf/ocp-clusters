@@ -1,0 +1,100 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: ConfigurationPolicy
+metadata:
+  name: equeiroz-prd-install-config
+spec:
+  remediationAction: enforce
+  severity: low
+  object-templates-raw: |
+    {{- $metadata := (lookup "v1" "ConfigMap" "equeiroz-prd" "cluster-info") }}
+    {{- $creds := (lookup "v1" "Secret" "openshift-vsphere-infra" "vsphere-creds") }}
+    {{- $installConfig := `
+    apiVersion: v1
+    baseDomain: '%[1]s'
+    compute:
+    - architecture: amd64
+      hyperthreading: Enabled
+      name: worker
+      platform:
+        vsphere:
+          coresPerSocket: %[2]s
+          cpus: %[3]s
+          memoryMB: %[4]s
+          osDisk:
+            diskSizeGB: %[5]s
+      replicas: %[6]s
+    controlPlane:
+      architecture: amd64
+      hyperthreading: Enabled
+      name: master
+      platform:
+        vsphere:
+          coresPerSocket: %[7]s
+          cpus: %[8]s
+          memoryMB: %[9]s
+          osDisk:
+            diskSizeGB: %[10]s
+      replicas: 3
+    metadata:
+      name: '%[11]s'
+    networking:
+      clusterNetwork:
+      - cidr: '%[12]s'
+        hostPrefix: %[13]s
+      machineNetwork:
+      - cidr: '%[14]s'
+      networkType: '%[15]s'
+      serviceNetwork:
+      - '%[16]s'
+    platform:
+      vsphere:
+        apiVIP: '%[17]s'
+        cluster: '%[18]s'
+        datacenter: '%[19]s'
+        defaultDatastore: '%[20]s' 
+        folder: '%[21]s'
+        ingressVIP: '%[22]s'
+        network: '%[23]s'
+        password: '%[24]s'
+        username: '%[25]s'
+        vCenter: '%[26]s'
+    pullSecret: "" # skip, hive will inject based on it's secrets
+    sshKey: '%[27]s'
+    ` }}
+    
+    - complianceType: mustonlyhave
+      objectDefinition:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: install-config
+          namespace: equeiroz-prd
+        data:
+          install-config.yaml: {{ (printf $installConfig  ($metadata.data.base_domain)
+                                                          ($metadata.data.compute_cores_per_socket)
+                                                          ($metadata.data.compute_cpus)
+                                                          ($metadata.data.compute_memory_mb)
+                                                          ($metadata.data.compute_disk_size_gb)
+                                                          ($metadata.data.compute_replicas)
+                                                          ($metadata.data.control_plane_cores_per_socket)
+                                                          ($metadata.data.control_plane_cpus)
+                                                          ($metadata.data.control_plane_memory_mb)
+                                                          ($metadata.data.control_plane_disk_size_gb)
+                                                          ($metadata.data.cluster_name)
+                                                          ($metadata.data.clusterNetwork_cidr)   
+                                                          ($metadata.data.clusterNetwork_hostPrefix)
+                                                          ($metadata.data.machineNetwork_cidr)
+                                                          ($metadata.data.network_type)
+                                                          ($metadata.data.serviceNetwork_cidr)
+                                                          ($metadata.data.api_vip)
+                                                          ($metadata.data.vsphere_cluster)
+                                                          ($metadata.data.vsphere_datacenter)
+                                                          ($metadata.data.vsphere_default_datastore)
+                                                          ($metadata.data.vsphere_folder)
+                                                          ($metadata.data.ingress_vip)
+                                                          ($metadata.data.vsphere_network)
+                                                          ($creds.data.password | base64dec)
+                                                          ($creds.data.username | base64dec)
+                                                          ($metadata.data.vsphere_vcenter)
+                                                          (index $creds.data "sshKey" | base64dec)
+                                  ) | base64enc }}
