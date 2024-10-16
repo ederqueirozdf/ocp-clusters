@@ -16,7 +16,6 @@ spec:
   controlPlaneConfig:
     servingCertificates: {}
   installAttemptsLimit: 2
-  installed: false
   platform:
     vsphere:
       cluster: {{ .Values.cluster.vsphere.cluster }}
